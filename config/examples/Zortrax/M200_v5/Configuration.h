@@ -1300,7 +1300,7 @@
  * Override with M92 (when enabled below)
  *                                      X, Y, Z [, I [, J [, K...]]], E0 [, E1[, E2...]]
  */
-#define DEFAULT_AXIS_STEPS_PER_UNIT   { 640, 640, 800, 960 }
+#define DEFAULT_AXIS_STEPS_PER_UNIT   { 640, 640, 400, 960 }
 // Z axis steps for different hardware versions:
 // 800 - v1, v3, v4
 // 791 - v2
