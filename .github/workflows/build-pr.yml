@@ -16,7 +16,7 @@ jobs:
   build:
 
     name: Test Build
-    if: github.repository == 'MarlinFirmware/Configurations'
+    if: github.repository == 'Zortrax3D/MarlinConfigurationsZortraxM200'
 
     runs-on: ubuntu-22.04
 
@@ -35,7 +35,7 @@ jobs:
 
         # Use `git diff` to get a list of folders with altered .h files
         # between the current commit and the base branch of the Pull Request
-        DIRS=$(git diff --name-only --diff-filter=AMR origin/$BASE_BRANCH HEAD | grep -E ".+\.h" | while IFS= read -r f; do dirname "$f"; done | uniq)
+        DIRS=$(git diff --name-only --diff-filter=AMR origin/$BASE_BRANCH HEAD | grep -E "config/examples/Zortrax/.+\.h" | while IFS= read -r f; do dirname "$f"; done | uniq)
 
         # Exit if nothing testable changed
         [[ -z $DIRS ]] && { echo "No Configuration changes detected."; exit ; }
@@ -76,7 +76,7 @@ jobs:
     # Fetch the code from the other repo and compile it:
     - name: Clone Marlin
       run: |
-        git clone https://github.com/MarlinFirmware/Marlin.git
+        git clone https://github.com/Zortrax3D/MarlinZortraxM200.git Marlin
 
     # For each directory containing a changed config file, copy the .h files and build the code:
     - name: Test all changed config files
