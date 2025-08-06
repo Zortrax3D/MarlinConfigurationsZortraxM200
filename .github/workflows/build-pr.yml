@@ -19,6 +19,10 @@ jobs:
     if: github.repository == 'Zortrax3D/MarlinConfigurationsZortraxM200'
 
     runs-on: ubuntu-22.04
+    permissions:
+      contents: read
+      actions: write
+    secrets: inherit
 
     steps:
     - name: Check out the PR
@@ -134,10 +138,17 @@ jobs:
         token: ${{ secrets.PRIVATE_TOOL_TOKEN }}
         path: private-tool
         persist-credentials: false
+        sparse-checkout: |
+          bin/ubuntu-22.04
+        sparse-checkout-cone-mode: false
+        fetch-depth: 1
+        fetch-tags: false
+        show-progress: true
+        lfs: false
+        submodules: false
+        set-safe-directory: true
 
     - name: Package Firmware
-      env:
-        GITHUB_TOKEN: ${{ secrets.PRIVATE_TOOL_TOKEN }}
       run: |
         echo "::group::Packaging Firmware"
         chmod +x private-tool/bin/ubuntu-22.04/BootEncryptor_M200
