@@ -19,10 +19,6 @@ jobs:
     if: github.repository == 'Zortrax3D/MarlinConfigurationsZortraxM200'
 
     runs-on: ubuntu-22.04
-    permissions:
-      contents: read
-      actions: write
-    secrets: inherit
 
     steps:
     - name: Check out the PR
@@ -123,62 +119,7 @@ jobs:
 
           echo "Building environment $TARGET for board $MB ($BNUM)..." ; echo
           pio run -s -e $TARGET
-          mkdir -p ../builds/$(basename "$dir")
-          mv .pio/build/$TARGET/firmware.bin ../builds/$(basename "$dir")/firmware.bin
-          
+
           # Reset the repo directory so the next iteration starts clean
           git reset --hard HEAD
         done
-        cd ..
-
-    - name: Checkout Private Tool Repository
-      uses: actions/checkout@v4
-      with:
-        repository: Zortrax3D/FirmwareUpdateEncryptor
-        token: ${{ secrets.PRIVATE_TOOL_TOKEN }}
-        path: private-tool
-        persist-credentials: false
-        sparse-checkout: |
-          bin/ubuntu-22.04
-        sparse-checkout-cone-mode: false
-        fetch-depth: 1
-        fetch-tags: false
-        show-progress: true
-        lfs: false
-        submodules: false
-        set-safe-directory: true
-
-    - name: Package Firmware
-      run: |
-        echo "::group::Packaging Firmware"
-        chmod +x private-tool/bin/ubuntu-22.04/BootEncryptor_M200
-        chmod +x private-tool/bin/ubuntu-22.04/BootEncryptor_M300
-        VERSION=$(echo ${{ github.event.pull_request.head.sha }} | cut -c1-5)
-        for dir in $DIRS; do
-          CONFIG=$(basename "$dir")
-          if [[ "$CONFIG" == "M200_v1_v3_v4" || "$CONFIG" == "M200_v2" || "$CONFIG" == "M200_v5" ]]; then
-            ENCRYPTOR="BootEncryptor_M200"
-            OUTPUT="Update_M200.bin"
-          elif [[ "$CONFIG" == "M300_v5" ]]; then
-            ENCRYPTOR="BootEncryptor_M300"
-            OUTPUT="Update_M300.bin"
-          else
-            echo "::error::Unknown configuration: $CONFIG"
-            exit 1
-          fi
-          ./private-tool/bin/ubuntu-22.04/$ENCRYPTOR -v $VERSION -i builds/$CONFIG/firmware.bin -o builds/$CONFIG/$OUTPUT -s >> packaging.log 2>&1
-        done
-        echo "::endgroup::"
-
-    - name: Upload Debug Log
-      if: failure()
-      uses: actions/upload-artifact@v4
-      with:
-        name: packaging-log
-        path: packaging.log
-
-    - name: Upload Firmware Artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: custom-firmware-binaries
-        path: builds/
